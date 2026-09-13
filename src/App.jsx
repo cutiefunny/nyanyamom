@@ -2,8 +2,22 @@ import { onMount, onCleanup } from 'solid-js'
 import Phaser from 'phaser'
 import catNormalImg from './assets/units/normal.png'
 import catLeaderImg from './assets/units/leader.png'
+import bowl0Img from './assets/bowls/bowl_0.png'
+import bowl5Img from './assets/bowls/bowl_5.png'
+import bowl50Img from './assets/bowls/bowl_50.png'
+import bowl70Img from './assets/bowls/bowl_70.png'
+import bowl100Img from './assets/bowls/bowl_100.png'
 import { config, setConfig } from './gameConfig'
 import './App.css'
+
+function getBowlTextureKey(currentAmount, maxCapacity = 100) {
+  const percentage = (currentAmount / maxCapacity) * 100
+  if (percentage <= 0) return 'bowl_0'
+  if (percentage <= 20) return 'bowl_5'
+  if (percentage <= 60) return 'bowl_50'
+  if (percentage <= 85) return 'bowl_70'
+  return 'bowl_100'
+}
 
 function App() {
   let gameContainer
@@ -36,6 +50,13 @@ function App() {
         frameWidth: 100,
         frameHeight: 100
       })
+
+      // 밥그릇 상태 이미지
+      this.load.image('bowl_0', bowl0Img)
+      this.load.image('bowl_5', bowl5Img)
+      this.load.image('bowl_50', bowl50Img)
+      this.load.image('bowl_70', bowl70Img)
+      this.load.image('bowl_100', bowl100Img)
     }
 
     function createScene() {
@@ -83,39 +104,37 @@ function App() {
       const bowlContainer = this.add.container(centerX, centerY)
 
       // 밥그릇 하이라이트 링 (드래그 이동 모드 표시)
-      const highlightRing = this.add.circle(0, 0, config.bowl.outerRadius + 8, 0x60a5fa, 0.4)
+      const highlightRing = this.add.circle(0, 0, 32, 0x60a5fa, 0.4)
       highlightRing.setVisible(false)
 
-      // 밥그릇 바깥 테두리/그림자
-      const outerBowl = this.add.circle(0, 0, config.bowl.outerRadius, 0x4a5568)
-
-      // 밥그릇 본체 (클릭 & 드래그 인터랙티브)
-      const mainBowl = this.add.circle(0, 0, config.bowl.mainRadius, 0xe2e8f0)
-      mainBowl.setInteractive({ useHandCursor: true })
-
-      // 밥그릇 안쪽
-      const innerBowl = this.add.circle(0, 0, config.bowl.innerRadius, 0xcbd5e1)
-
-      // 고양이 밥그릇 아이콘
-      const bowlIcon = this.add.text(0, 0, '🥣', { fontSize: '32px' }).setOrigin(0.5)
+      // 밥그릇 본체 스프라이트 (클릭 & 드래그 인터랙티브)
+      let currentBowlTextureKey = getBowlTextureKey(config.bowl.currentAmount, config.bowl.maxCapacity)
+      const bowlSprite = this.add.image(0, 0, currentBowlTextureKey)
+      bowlSprite.setDisplaySize(50, 50)
+      bowlSprite.setInteractive({ useHandCursor: true })
 
       // 밥 잔량 표시 텍스트 UI
-      const bowlAmountText = this.add.text(0, 58, '', {
-        fontSize: '15px',
+      const bowlAmountText = this.add.text(0, 36, '', {
+        fontSize: '14px',
         color: '#ffffff',
         backgroundColor: 'rgba(31, 41, 55, 0.9)',
-        padding: { x: 10, y: 5 },
+        padding: { x: 8, y: 4 },
         fontStyle: 'bold'
       }).setOrigin(0.5)
 
-      bowlContainer.add([highlightRing, outerBowl, mainBowl, innerBowl, bowlIcon, bowlAmountText])
+      bowlContainer.add([highlightRing, bowlSprite, bowlAmountText])
 
-      // 밥 잔량 실시간 업데이트
+      // 밥 잔량 및 밥그릇 이미지 실시간 업데이트
       this.time.addEvent({
         delay: 50,
         loop: true,
         callback: () => {
           bowlAmountText.setText(`🌾 사료: ${config.bowl.currentAmount} / ${config.bowl.maxCapacity}`)
+          const newTextureKey = getBowlTextureKey(config.bowl.currentAmount, config.bowl.maxCapacity)
+          if (currentBowlTextureKey !== newTextureKey) {
+            currentBowlTextureKey = newTextureKey
+            bowlSprite.setTexture(newTextureKey)
+          }
         }
       })
 
@@ -162,7 +181,7 @@ function App() {
       let isDragging = false
       let holdStartTime = 0
 
-      mainBowl.on('pointerdown', () => {
+      bowlSprite.on('pointerdown', () => {
         holdStartTime = Date.now()
         isDragging = false
 
@@ -339,19 +358,33 @@ function App() {
 
         activeCats.push(catObj)
 
-        // 목표 위치로 이동 시작 함수
+        // 목표 위치로 이동 시작 함수 (밥그릇 경계선에서 겹치지 않고 충돌 정지)
         function startMovementTo(tx, ty) {
-          catSprite.play(walkAnimKey)
-          catSprite.setFlipX(catContainer.x < tx)
+          const bowlRadius = 25 // 50px 밥그릇의 반지름
+          const catRadius = displayCatSize / 2 // 고양이 이미지의 반지름
+          const stopDist = bowlRadius + catRadius
 
-          const dist = Phaser.Math.Distance.Between(catContainer.x, catContainer.y, tx, ty)
-          const dur = Math.max(300, (dist / catObj.speed) * 1000)
+          const angle = Phaser.Math.Angle.Between(catContainer.x, catContainer.y, tx, ty)
+          const distToTarget = Phaser.Math.Distance.Between(catContainer.x, catContainer.y, tx, ty)
+
+          let stopX = tx
+          let stopY = ty
+          if (distToTarget > stopDist) {
+            stopX = tx - Math.cos(angle) * stopDist
+            stopY = ty - Math.sin(angle) * stopDist
+          }
+
+          catSprite.play(walkAnimKey)
+          catSprite.setFlipX(catContainer.x < stopX)
+
+          const moveDist = Phaser.Math.Distance.Between(catContainer.x, catContainer.y, stopX, stopY)
+          const dur = Math.max(300, (moveDist / catObj.speed) * 1000)
 
           catObj.state = 'APPROACHING'
           catObj.moveTween = scene.tweens.add({
             targets: catContainer,
-            x: tx,
-            y: ty,
+            x: stopX,
+            y: stopY,
             duration: dur,
             ease: 'Linear',
             onComplete: () => handleArrivalAtBowl()
