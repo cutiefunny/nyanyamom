@@ -177,6 +177,149 @@ input[type="range"] {
   transform: translateY(-1px);
 }
 
+/* 점수 및 콤보 대시보드 */
+.score-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.score-card {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.score-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #38bdf8;
+  font-variant-numeric: tabular-nums;
+}
+
+.combo-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #f59e0b;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.combo-fire {
+  color: #ef4444;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.04); }
+}
+
+.max-combo-hint {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* 판정 통계 필 */
+.judgment-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 4px;
+  border-radius: 8px;
+  background: rgba(17, 24, 39, 0.5);
+  border: 1px solid #374151;
+}
+
+.stat-pill span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.stat-pill b {
+  font-size: 15px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.perfect-pill {
+  border-color: rgba(251, 191, 36, 0.4);
+}
+.perfect-pill span, .perfect-pill b {
+  color: #fbbf24;
+}
+
+.great-pill {
+  border-color: rgba(52, 211, 153, 0.4);
+}
+.great-pill span, .great-pill b {
+  color: #34d399;
+}
+
+.good-pill {
+  border-color: rgba(96, 165, 250, 0.4);
+}
+.good-pill span, .good-pill b {
+  color: #60a5fa;
+}
+
+.miss-pill {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+.miss-pill span, .miss-pill b {
+  color: #ef4444;
+}
+
+/* 토글 스위치 그룹 */
+.toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(17, 24, 39, 0.4);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #374151;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #cbd5e1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+
 
 
 

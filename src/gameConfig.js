@@ -1,49 +1,52 @@
-// 게임 설정 파일 (Reactive Game Configuration with Solid Store)
+// 리듬 게임 설정 파일 (Reactive Game Configuration with Solid Store)
 import { createStore } from 'solid-js/store'
 
 export const [config, setConfig] = createStore({
   // 캔버스 설정
   canvas: {
-    width: 600,
-    height: 600,
-    backgroundColor: '#2d3748'
+    width: 1200,
+    height: 420,
+    backgroundColor: '#1e2433'
+  },
+
+  // 리듬 게임 설정
+  rhythm: {
+    bpm: 100, // 분당 비트 수
+    travelBeats: 16, // 스폰 위치에서 밥그릇(판정선)까지 이동하는 데 걸리는 박자 수 (속도 2배 감속)
+    spawnIntervalBeats: 2, // 고양이 스폰 주기 (박자 단위: 2비트마다)
+    spawnChance: 0.75, // 스폰 확률 (0.75 = 75%)
+    soundEnabled: true, // 효과음 활성화 여부
+    metronomeSound: true, // 메트로놈 비트 사운드
+    // 판정 범위 (오차 밀리초)
+    perfectWindow: 65,
+    greatWindow: 130,
+    goodWindow: 200
   },
 
   // 고양이 관련 설정
   cat: {
-    // 고양이 생성 검사 주기 (ms)
-    spawnInterval: 1000,
-    
-    // 고양이 생성 확률 (0.1 = 10%)
-    spawnChance: 0.1,
-    
-    // 고양이 이동 속도 범위 (화면 밖 <-> 밥그릇 이동 시간 ms)
-    minMoveDuration: 3000,
-    maxMoveDuration: 6000,
-    
-    // 고양이 밥 먹는 시간 설정
-    eating: {
-      pulseDuration: 250,
-      pulseRepeat: 3
-    },
-    
-    // 고양이 표시 크기 (px)
-    size: 64,
-
-    // 특수개체(리더 고양이) 스폰 확률 (0.1 = 10%)
-    specialChance: 0.1,
-
-    // 특수개체 사료 소모량 (개)
-    specialFoodConsume: 5
+    size: 70, // 일반 고양이 표시 크기
+    specialChance: 0.2, // 특수개체(리더 고양이) 등장 확률
+    specialFoodConsume: 3, // 특수개체 사료 소모량
+    normalFoodConsume: 1 // 일반 고양이 사료 소모량
   },
 
   // 밥그릇 및 사료 설정
   bowl: {
     maxCapacity: 100,
     currentAmount: 100,
-    refillAmount: 10,
-    outerRadius: 50,
-    mainRadius: 35,
-    innerRadius: 25
+    refillAmount: 20
+  },
+
+  // 게임 진행 통계 (점수, 콤보 등)
+  stats: {
+    score: 0,
+    combo: 0,
+    maxCombo: 0,
+    perfect: 0,
+    great: 0,
+    good: 0,
+    miss: 0
   }
 })
+
